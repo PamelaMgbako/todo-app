@@ -8,7 +8,7 @@ const taskSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["pending", "completed", "deleted"],
+    enum: ["pending", "completed", "deleted", "overdue"],
     default: "pending",
   },
   user: {
@@ -17,6 +17,10 @@ const taskSchema = new mongoose.Schema({
     required: true,
   },
   createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  dueDate: {
     type: Date,
     default: Date.now,
   },

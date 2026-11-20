@@ -39,6 +39,7 @@
         <!-- Add Task Form -->
         <form action="/tasks" method="POST" class="add-form">
             <input type="text" name="title" placeholder="Add a new task..." required autocomplete="off">
+            <input type="datetime-local" name="dueDate" required>
             <button type="submit">Add Task</button>
         </form>
 
@@ -47,6 +48,7 @@
             <a href="/dashboard?filter=all" class="filter-btn <%= currentFilter === 'all' ? 'active' : '' %>">All</a>
             <a href="/dashboard?filter=pending" class="filter-btn <%= currentFilter === 'pending' ? 'active' : '' %>">Pending</a>
             <a href="/dashboard?filter=completed" class="filter-btn <%= currentFilter === 'completed' ? 'active' : '' %>">Completed</a>
+            <a href="/dashboard?filter=overdue" class="filter-btn <%= currentFilter === 'overdue' ? 'active' : '' %>">Overdue</a>
         </div>
 
         <!-- Task List -->
@@ -72,5 +74,42 @@
             <% }) %>
         </ul>
     </div>
+
+    <!-- Socket.IO Client Library -->
+    <script src="/socket.io/socket.io.js"></script>
+    
+    <script> 
+    
+    // connect to Socket.io using the jwt token stored in session 
+    const socket = io({
+        auth:{
+            token: "<%= token %>"
+        }
+    });
+
+    //Listen for overdue notifications 
+           socket.on("taskOverdue", (data) => {
+            // Create a top notification bar
+            const banner = document.createElement("div");
+            banner.style.cssText = "background: #ffc107; color: #333; padding: 12px; font-weight: bold; text-align: center; border-radius: 4px; margin-bottom: 15px;";
+            banner.textContent = "⚠️ " + data.message;
+
+            const container = document.querySelector(".container");
+            container.insertBefore(banner, container.firstChild);
+
+            // Wait 4 seconds so the user can see the alert, then reload
+            setTimeout(() => {
+                location.reload();
+            }, 4000);
+        });
+
+// listen for completion notifications
+socket.on("taskCompleted", (data) => {
+    alert("✅ " + data.message);
+    location.reload(); // reload the page to reflect the updated task status on screen
+});
+    </script>
+
+
 </body>
 </html>
